@@ -2,7 +2,7 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from config import ADMINS
-from database.users import get_shortener_settings, update_shortener_settings
+from database.users_mdb import get_shortener_settings, update_shortener_settings
 
 @Client.on_message(filters.command("shortener") & filters.user(ADMINS))
 async def shortener_panel(client, message):
