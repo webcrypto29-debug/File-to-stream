@@ -16,7 +16,7 @@ async def is_user_verified(user_id, expire_seconds=86400):
         return False
     return (time.time() - user["last_verified"]) < expire_seconds
 
-# 2. वेरिफिकेशन कम्पलीट होने पर टाइम सेव करना
+# 2. वेरिफिकेशन टाइम अपडेट करना
 async def update_verify_time(user_id):
     await users_col.update_one(
         {"_id": user_id},
@@ -24,7 +24,7 @@ async def update_verify_time(user_id):
         upsert=True
     )
 
-# 3. शार्टनर टोकन जनरेट करना (ताकि कोई फेक तरीके से bypass ना कर सके)
+# 3. शॉर्टनर टोकन मैनेज करना
 async def generate_verify_token(user_id):
     token = str(uuid.uuid4())[:8]
     await tokens_col.update_one(
@@ -42,10 +42,20 @@ async def verify_token(user_id, token):
         return True
     return False
 
-# 4. ऑन/ऑफ़ और शॉर्टनर सेटिंग्स
+# 4. शॉर्टनर सेटिंग्स (गेट और अपडेट)
 async def get_shortener_settings():
     st = await settings_col.find_one({"_id": "shortener_config"})
     if not st:
         return {"is_active": True, "url": SHORTENER_URL, "api": SHORTENER_API}
     return st
+
+# यह फ़ंक्शन मिसिंग था, इसे यहाँ जोड़ दिया गया है:
+async def update_shortener_settings(is_active=None, url=None, api=None):
+    current = await get_shortener_settings()
+    new_data = {
+        "is_active": is_active if is_active is not None else current["is_active"],
+        "url": url if url is not None else current["url"],
+        "api": api if api is not None else current["api"],
+    }
+    await settings_col.update_one({"_id": "shortener_config"}, {"$set": new_data}, upsert=True)
     
