@@ -1,4 +1,4 @@
-import requests
+
 
 def get_short_link(long_url: str, api_token: str) -> str:
     """
